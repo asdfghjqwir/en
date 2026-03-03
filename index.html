@@ -1,0 +1,202 @@
+Gacha money report · HTML
+コピー
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ドブ捨てマネー報告書：ガチャ課金編</title>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@900&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-color: #00F5FF; --accent-pink: #FF007F; --yellow: #FFD700; --black: #1A1A1A; }
+        body { background-color: var(--bg-color); font-family: 'M PLUS Rounded 1c', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; transition: background-color 0.5s ease; box-sizing: border-box; }
+        #app { width: 100%; max-width: 380px; background: #fff; border: 5px solid var(--black); border-radius: 30px; box-shadow: 10px 10px 0px var(--black); padding: 30px 20px; text-align: center; box-sizing: border-box; }
+        #quiz, #loading, #result { display: none; }
+        #quiz { display: block; }
+        h1 { font-size: 1.4rem; margin-bottom: 25px; line-height: 1.4; color: var(--black); }
+        .input-group { text-align: left; margin-bottom: 20px; }
+        label { font-size: 0.8rem; font-weight: 900; color: var(--black); margin-left: 5px; }
+        select, input[type="number"] { width: 100%; padding: 15px; border: 4px solid var(--black); border-radius: 15px; margin-top: 8px; font-size: 1.1rem; font-weight: 900; box-sizing: border-box; outline: none; background: #fff; font-family: 'M PLUS Rounded 1c', sans-serif; }
+        .result-card { background: #fff; border: 4px solid var(--black); border-radius: 25px; padding: 40px 15px 20px; margin-bottom: 25px; position: relative; }
+        .result-label { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: var(--yellow); color: var(--black); font-size: 0.9rem; padding: 6px 25px; border-radius: 50px; border: 4px solid var(--black); white-space: nowrap; box-shadow: 4px 4px 0px var(--black); }
+        #result-rank { font-size: 1.4rem; font-weight: 900; margin-bottom: 10px; color: #333; }
+        .total-loss { font-size: 2.8rem; font-weight: 900; color: var(--accent-pink); line-height: 1.1; margin: 15px 0; text-shadow: 2px 2px 0px var(--black); word-break: break-all; }
+        .section-box { border-top: 4px solid var(--black); margin: 20px 0 10px; padding-top: 15px; text-align: left; }
+        .tag { color: #fff; font-size: 0.7rem; padding: 3px 12px; border-radius: 8px; border: 2px solid var(--black); display: inline-block; margin-bottom: 8px; font-weight: 900; }
+        .desc { font-size: 0.85rem; font-weight: 900; color: var(--black); line-height: 1.5; }
+        .solution-list { list-style: none; padding: 0; margin: 5px 0 0; }
+        .solution-list li { font-size: 0.85rem; font-weight: 900; margin-bottom: 5px; position: relative; padding-left: 20px; color: var(--black); }
+        .solution-list li::before { content: "✔"; position: absolute; left: 0; color: var(--accent-pink); }
+        .share-btn { width: 100%; padding: 16px; border: 4px solid var(--black); border-radius: 50px; font-weight: 900; font-size: 1.1rem; cursor: pointer; background: #000; color: #fff; box-shadow: 0 6px 0px #444; transition: 0.1s; margin-bottom: 15px; display: block; text-decoration: none; font-family: inherit; box-sizing: border-box; text-align: center; }
+        .share-btn:active { transform: translateY(4px); box-shadow: 0 2px 0px #444; }
+        .physics-button { width: 100%; padding: 14px; border: 4px solid var(--black); border-radius: 20px; font-weight: 900; cursor: pointer; background: #FF9900; color: #000; box-shadow: 0 8px 0px var(--black); transition: 0.1s; display: block; text-decoration: none; box-sizing: border-box; text-align: center; margin-bottom: 15px; font-size: 0.95rem; font-family: 'M PLUS Rounded 1c', sans-serif; }
+        .physics-button:active { transform: translateY(6px); box-shadow: 0 2px 0px var(--black); }
+        .btn-main { width: 100%; padding: 18px; border: 4px solid var(--black); border-radius: 50px; font-weight: 900; font-size: 1.1rem; background: var(--yellow); box-shadow: 0 6px 0px var(--black); cursor: pointer; font-family: 'M PLUS Rounded 1c', sans-serif; }
+        .btn-main:active { transform: translateY(4px); box-shadow: 0 2px 0px var(--black); }
+        #loading { padding: 40px 0; }
+        #loading h2 { font-size: 1.2rem; color: var(--black); animation: pulse 1s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+        .sub-note { font-size: 0.75rem; font-weight: 900; color: var(--black); margin-top: -10px; margin-bottom: 20px; opacity: 0.8; }
+        .reset-btn { width: 100%; padding: 14px; border: 4px solid var(--black); border-radius: 50px; font-weight: 900; font-size: 1rem; background: #eee; box-shadow: 0 4px 0px var(--black); cursor: pointer; font-family: 'M PLUS Rounded 1c', sans-serif; }
+        .reset-btn:active { transform: translateY(3px); box-shadow: 0 1px 0px var(--black); }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div id="quiz">
+        <h1>🎰 ドブ捨てマネー報告書<br><span style="font-size:0.8em;color:var(--accent-pink);">〜ガチャ課金編〜<br>毎月NISAで運用していたら？</span></h1>
+        <div class="input-group">
+            <label>現在の年齢（10歳〜80歳）</label>
+            <input type="number" id="age" inputmode="numeric" min="10" max="80" placeholder="例: 25">
+        </div>
+        <div class="input-group">
+            <label>月の課金額はどのくらい？</label>
+            <select id="monthly">
+                <option value="500">月500円（無課金に毛が生えた程度）</option>
+                <option value="2000" selected>月2,000円（微課金勢）</option>
+                <option value="5000">月5,000円（課金勢予備軍）</option>
+                <option value="10000">月1万円（社会人の闇）</option>
+                <option value="30000">月3万円（廃課金ルーキー）</option>
+                <option value="100000">月10万円（もはや宗教）</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label>課金歴は？</label>
+            <select id="years">
+                <option value="1">1年未満（まだ間に合う）</option>
+                <option value="3" selected>3年（泥沼の入口）</option>
+                <option value="5">5年（沼の中心）</option>
+                <option value="10">10年以上（もはや人生）</option>
+            </select>
+        </div>
+        <button class="btn-main" onclick="diagnose()">💸 損失を査定する</button>
+    </div>
+
+    <div id="loading">
+        <h2>🎲 複利の暴力を計算中...</h2>
+    </div>
+
+    <div id="result">
+        <div class="result-card">
+            <div class="result-label">診断結果</div>
+            <div id="result-rank">---</div>
+            <div class="total-loss" id="totalLossDisplay">¥0</div>
+            <div class="sub-note">※このまま<span id="endAge">87</span>歳まで続けた場合（年利5%複利）</div>
+            <div class="section-box">
+                <span class="tag" style="background:var(--bg-color);color:var(--black);">余計なお世話</span>
+                <div class="desc" id="jokeText" style="font-style:italic;"></div>
+            </div>
+            <div class="section-box" style="background:#f9f9f9;padding:15px;border-radius:15px;border:3px solid var(--black);">
+                <span class="tag" style="background:var(--black);color:#fff;">脱出コマンド</span>
+                <ul class="solution-list" id="solutions"></ul>
+            </div>
+        </div>
+        <button class="share-btn" onclick="shareX()">🐦 Xで恥をシェア</button>
+        <a id="amazonLink" href="#" target="_blank" class="physics-button">📦 Amazonで脱出アイテムをゲット</a>
+        <button class="reset-btn" onclick="resetApp()">🔄 もう一度診断する</button>
+    </div>
+</div>
+
+<script>
+const jokes = [
+    "あなたの推しキャラ、現実には存在しませんよ。スマホの中の幻に何万円払ってるんですか？",
+    "ガチャの確率表、読みましたか？あれ「出ない確率」を隠したまま書いてあるんですよ。",
+    "「あと1回で出る」と思ってる人、世界中に何千万人いると思います？全員そう思ってますよ。",
+    "その課金額、運営会社の社員のボーナスになってます。おめでとうございます、貢献してますね。",
+    "限定キャラのために払った金額、本物のライブ何回行けましたか？",
+    "ガチャを引くたびに「今度こそ」と思えるのは、ある意味才能です。詐欺師にとっての。",
+    "スマホ置いたら人生変わりますよ。ゲームの外にも人生ありますんで。",
+    "「引退する」と言って3回戻ってきた人、離婚を切り出せない人と同じ構造ですよ。",
+    "あなたの課金、データ上の数字を増やしてるだけです。サービス終了したら全部消えますよ。",
+    "「楽しければいい」と言いますけど、NISAも楽しくなりますよ、増えてくると。",
+    "ガチャの演出、よくできてますよね。そのクオリティを依存させることに全振りしてますから。",
+    "推しに課金するより、自分に課金した方が現実が変わりますよ。",
+    "月1万円の課金を30年続けた人の末路、想像したことありますか？ここに書いてありますよ。",
+    "「微課金です」という言葉、月5000円でも使ってる人多いですよね。誰が決めましたか？",
+    "ガチャで得た達成感、翌日には消えてませんか？NISAの利益は消えませんよ。",
+    "そのキャラ、3年後のサービス終了と同時に消えますよ。あなたの払ったお金と一緒に。",
+    "「ゲームが生きがい」という言葉、もう少し高いところに生きがいを置いてみてはどうですか？",
+    "課金するたびに運営が「ありがとうございます」と思ってる。あなたは「やった！」と思ってる。どちらが賢いですか？",
+    "排出率0.3%って書いてあるの、確認しましたか？1000回引いて3回ですよ。",
+    "あなたが課金をやめられないのは弱いからじゃなくて、そう設計されてるからです。でも気づいた今からが勝負ですよ。"
+];
+
+const escapeCommands = [
+    "課金上限を月500円にアプリ設定でロックする",
+    "ガチャ前に「引いたら口座残高を必ず見る」とルールを決める",
+    "そのゲームを削除して1ヶ月だけ試す（戻れますから）",
+    "課金額を家計簿アプリで可視化して毎月確認する",
+    "その月の課金額をそのままNISAに入れてみる",
+    "ゲーム仲間に「今月は課金しない」と宣言する（監視効果）"
+];
+
+function diagnose() {
+    const age = parseInt(document.getElementById('age').value);
+    const monthly = parseInt(document.getElementById('monthly').value);
+    const pastYears = parseInt(document.getElementById('years').value);
+    if (isNaN(age) || age < 10 || age > 80) { alert('10歳から80歳の間で入力してください。'); return; }
+
+    document.getElementById('quiz').style.display = 'none';
+    document.getElementById('loading').style.display = 'block';
+
+    setTimeout(() => {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('result').style.display = 'block';
+
+        const avgLife = 87;
+        const yearsLeft = Math.max(1, avgLife - age);
+        document.getElementById('endAge').innerText = avgLife;
+
+        const r = 0.05 / 12;
+        const pastMonths = pastYears * 12;
+        const pastLoss = monthly * (Math.pow(1 + r, pastMonths) - 1) / r;
+        const futureMonths = yearsLeft * 12;
+        const futureLoss = monthly * (Math.pow(1 + r, futureMonths) - 1) / r;
+        const totalLoss = pastLoss + futureLoss;
+
+        let displayMoney = totalLoss >= 100000000
+            ? (totalLoss / 100000000).toFixed(1) + "億円"
+            : Math.floor(totalLoss / 10000).toLocaleString() + "万円";
+        document.getElementById('totalLossDisplay').innerText = "¥" + displayMoney;
+
+        let rank = "", bgColor = "";
+        if (totalLoss >= 100000000) { rank = "🔴 生涯廃課金・伝説の養分"; bgColor = "#FF007F"; }
+        else if (totalLoss >= 50000000) { rank = "🟣 廃課金殿堂入り"; bgColor = "#6A0DAD"; }
+        else if (totalLoss >= 20000000) { rank = "🟠 課金沼の住人"; bgColor = "#FF4500"; }
+        else if (totalLoss >= 5000000) { rank = "🔵 運営の優良顧客"; bgColor = "#0055AA"; }
+        else { rank = "🟢 まだ間に合う予備軍"; bgColor = "#2E7D32"; }
+
+        document.body.style.backgroundColor = bgColor;
+        document.getElementById('result-rank').innerText = rank;
+        document.getElementById('jokeText').innerText = jokes[Math.floor(Math.random() * jokes.length)];
+
+        const solList = document.getElementById('solutions');
+        solList.innerHTML = "";
+        const shuffled = [...escapeCommands].sort(() => 0.5 - Math.random());
+        shuffled.slice(0, 3).forEach(cmd => {
+            const li = document.createElement('li');
+            li.innerText = cmd;
+            solList.appendChild(li);
+        });
+
+        const keywords = ["家計簿 手帳", "貯金箱 大人", "インデックス投資 入門", "NISA 本 2024"];
+        const searchWord = encodeURIComponent(keywords[Math.floor(Math.random() * keywords.length)]);
+        document.getElementById('amazonLink').href = "https://www.amazon.co.jp/s?k=" + searchWord + "&tag=aicheck-22";
+    }, 1200);
+}
+
+function shareX() {
+    const rank = document.getElementById('result-rank').innerText;
+    const loss = document.getElementById('totalLossDisplay').innerText;
+    const text = encodeURIComponent("【ドブ捨てマネー報告書🎰ガチャ課金編】\nガチャ課金を続けた結果、生涯損失（新NISA複利換算）は「" + loss + "」でした…💸\n\nランク：" + rank + "\n\n#ドブ捨てマネー報告書 #ガチャ課金");
+    window.open("https://twitter.com/intent/tweet?text=" + text, '_blank');
+}
+
+function resetApp() {
+    document.getElementById('result').style.display = 'none';
+    document.getElementById('quiz').style.display = 'block';
+    document.body.style.backgroundColor = '#00F5FF';
+}
+</script>
+</body>
